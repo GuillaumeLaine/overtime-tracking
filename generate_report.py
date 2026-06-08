@@ -191,10 +191,11 @@ def page_summary(pdf: PdfPages, df: pd.DataFrame, daily: pd.DataFrame,
     # ── Header ──────────────────────────────────────────────────────────────
     fig.text(0.05, 0.96, "Time Tracking Report",
              fontsize=22, fontweight="bold", color=TEXT, va="top")
-    fig.text(0.05, 0.91,
-             f"{member}   ·   "
-             f"{date_min.strftime('%b %d, %Y')} – {date_max.strftime('%b %d, %Y')}",
-             fontsize=11, color=SUBTLE, va="top")
+    fig.text(0.05, 0.91, member,
+             fontsize=13, fontweight="bold", color=ACCENT, va="top")
+    fig.text(0.05, 0.875,
+             f"{date_min.strftime('%b %d, %Y')}  –  {date_max.strftime('%b %d, %Y')}",
+             fontsize=11, color=TEXT, va="top")
 
     # ── KPI tiles ───────────────────────────────────────────────────────────
     # Each entry: (label, value, expected_or_None, sub_or_None, color)
@@ -213,6 +214,10 @@ def page_summary(pdf: PdfPages, df: pd.DataFrame, daily: pd.DataFrame,
     tile_w, tile_h = 0.155, 0.10
     gap, x0, y0 = 0.014, 0.05, 0.84
 
+    LABEL_RESERVE = 0.022   # height kept for the label at the bottom
+    LINE_H        = {"value": 0.023, "secondary": 0.017}
+    LINE_GAP      = 0.004
+
     for i, (label, value, expected, sub, color) in enumerate(kpis):
         x = x0 + i * (tile_w + gap)
         rect = mpatches.FancyBboxPatch(
@@ -222,14 +227,27 @@ def page_summary(pdf: PdfPages, df: pd.DataFrame, daily: pd.DataFrame,
             transform=fig.transFigure, figure=fig,
         )
         fig.add_artist(rect)
-        fig.text(x + tile_w / 2, y0 - 0.016, value,
-                 fontsize=12, fontweight="bold", color=color, ha="center", va="top")
-        if expected is not None:
-            fig.text(x + tile_w / 2, y0 - 0.044, f"/ {expected}",
-                     fontsize=8, color=SUBTLE, ha="center", va="top")
-        if sub is not None:
-            fig.text(x + tile_w / 2, y0 - 0.054, sub,
-                     fontsize=7, color=SUBTLE, ha="center", va="top")
+
+        # Center the value+secondary block in the space above the label
+        content_lines = (
+            [("value", value, 12, color)]
+            + ([("secondary", f"/ {expected}", 8, SUBTLE)] if expected else [])
+            + ([("secondary", sub,             7, SUBTLE)] if sub      else [])
+        )
+        block_h = sum(
+            LINE_H["value" if k == "value" else "secondary"] for k, *_ in content_lines
+        ) + LINE_GAP * (len(content_lines) - 1)
+
+        content_area_center = (y0 - tile_h + LABEL_RESERVE + y0 - 0.008) / 2
+        y_cur = content_area_center + block_h / 2
+
+        for kind, text, fs, col in content_lines:
+            lh = LINE_H[kind if kind == "value" else "secondary"]
+            fig.text(x + tile_w / 2, y_cur, text,
+                     fontsize=fs, fontweight="bold" if kind == "value" else "normal",
+                     color=col, ha="center", va="top")
+            y_cur -= lh + LINE_GAP
+
         fig.text(x + tile_w / 2, y0 - tile_h + 0.008, label,
                  fontsize=9, fontweight="bold", color=TEXT, ha="center", va="bottom")
 
