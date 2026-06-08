@@ -512,9 +512,11 @@ def main():
     if args.output:
         output_path = args.output
     else:
+        reports_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")
+        os.makedirs(reports_dir, exist_ok=True)
         d_min = daily["date"].min().strftime("%Y%m%d")
         d_max = daily["date"].max().strftime("%Y%m%d")
-        output_path = f"report_{d_min}_{d_max}.pdf"
+        output_path = os.path.join(reports_dir, f"report_{d_min}_{d_max}.pdf")
     weekly = build_weekly(daily, daily_target)
 
     with PdfPages(output_path) as pdf:
