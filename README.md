@@ -2,6 +2,10 @@
 
 Generates a PDF report from a [Toggl Track](https://toggl.com/track/) detailed CSV export.
 
+![Overview](./assets/overview.png)
+![Daily Hours](./assets/daily_hours.png)
+![Detailed Session](./assets/detailed_session.png)
+
 ## Requirements
 
 ```bash
