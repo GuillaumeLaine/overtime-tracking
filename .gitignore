@@ -2,3 +2,4 @@
 .vscode
 
 reports/
+.toggl_api_key

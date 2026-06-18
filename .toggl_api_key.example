@@ -1,0 +1,3 @@
+# Copy this file to .toggl_api_key and paste your Toggl Track API token.
+# Find it at: https://track.toggl.com/profile → "API Token" at the bottom of the page.
+YOUR_API_KEY_HERE
